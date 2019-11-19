@@ -11,7 +11,10 @@ from copy import deepcopy
 import matplotlib.pyplot as plt
 import numpy as np
 
+from rmgpy.data.base import Entry
 from rmgpy.data.thermo import ThermoLibrary, ThermoDatabase
+from rmgpy.thermo.thermodata import ThermoData
+
 ##################################################################
 
 def find_thermo_libs(path):
@@ -76,6 +79,7 @@ def read_thermo_lib_by_path(lib_path, thermo_db):
         logging.warning('The library %s has already been loaded' %(lib_path))
 
 
+
 def merge_thermo_lib(base_lib, lib_to_add):
     """
     Merge one library (lib_to_add) into the base library
@@ -138,14 +142,24 @@ def draw_free_energies(entry_list, label='', T_min=300, T_max=2000, legends="", 
     if T_min >= T_max:
         raise 'Invalid T_min({0}) and T_max({1}) arguments'.format(
             T_min, T_max)
+    if isinstance(entry_list[0], Entry):
+        entry_type = 'entry'
+    elif isinstance(entry_list[0], ThermoData):
+        entry_type = 'thermodata'
+    else:
+        raise('Unknown data entry type')
 
     T_list = np.arange(max(300, T_min), T_max, 10.0)
     Cp_list = np.zeros((T_list.shape[0], len(entry_list)))
 
     for i in range(T_list.shape[0]):
         try:
-            for j in range(len(entry_list)):
-                Cp_list[i, j] = entry_list[j].data.get_free_energy(T_list[i])
+            if entry_type == 'entry':
+                for j in range(len(entry_list)):
+                    Cp_list[i, j] = entry_list[j].data.get_free_energy(T_list[i])
+            elif entry_type == 'thermodata':
+                for j in range(len(entry_list)):
+                    Cp_list[i, j] = entry_list[j].get_free_energy(T_list[i])
         except (ValueError, AttributeError):
             continue
 
