@@ -55,15 +55,25 @@ def read_thermo_lib_by_path(lib_path, thermo_db):
         lib_path (str): path to thermo library file
         thermo_database (ThermoDatabase): RMG thermo database object
     """
-    if os.path.exists(lib_path) and lib_path not in thermo_db.library_order:
+    if not os.path.exists(lib_path):
+        logging.error('The library file %s does not exist.' %(lib_path))
+        return
+    if lib_path not in thermo_db.library_order:
         lib = ThermoLibrary()
-        lib.load(lib_path, ThermoDatabase().local_context,
-                 ThermoDatabase().global_context)
-        lib.label = lib_path
-        thermo_db.libraries[lib.label] = lib
-        thermo_db.library_order.append(lib.label)
-        logging.info('Loading thermodynamics library {1} from {0} ...'.format(
+        try:
+            lib.load(lib_path, ThermoDatabase().local_context,
+                    ThermoDatabase().global_context)
+        except:
+            logging.error('The library file %s is not vaild.' % (lib_path))
+            return
+        else:
+            lib.label = lib_path
+            thermo_db.libraries[lib.label] = lib
+            thermo_db.library_order.append(lib.label)
+            logging.info('Loading thermodynamics library {1} from {0} ...'.format(
             os.path.split(lib_path)[0], os.path.split(lib_path)[1]),)
+    else:
+        logging.warning('The library %s has already been loaded' %(lib_path))
 
 
 def merge_thermo_lib(base_lib, lib_to_add):
