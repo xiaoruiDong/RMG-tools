@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-The ARC Tool box
+The toolbox for sensitivity analysis related tasks
 """
 
 import logging

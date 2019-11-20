@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-The ARC Tool box
+The toolbox for common tasks
 """
 
 import logging

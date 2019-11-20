@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-The ARC Tool box
+The toolbox for thermo library related tasks
 """
 
 import glob
@@ -77,7 +77,6 @@ def read_thermo_lib_by_path(lib_path, thermo_db):
             os.path.split(lib_path)[0], os.path.split(lib_path)[1]),)
     else:
         logging.warning('The library %s has already been loaded' %(lib_path))
-
 
 
 def merge_thermo_lib(base_lib, lib_to_add):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-The ARC Tool box
+The toolbox for kinetic library related tasks
 """
 
 import logging
@@ -13,7 +13,6 @@ from rmgpy.data.kinetics import KineticsLibrary
 from rmgpy.data.thermo import ThermoLibrary
 
 ##################################################################
-
 
 def chemkin_to_kinetic_lib(chem_path, dict_path, name, save_path='', use_chemkin_names=True):
     """
