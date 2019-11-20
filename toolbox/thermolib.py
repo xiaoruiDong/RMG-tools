@@ -19,9 +19,8 @@ from rmgpy.thermo.thermodata import ThermoData
 
 def find_thermo_libs(path):
     """
-    This function assumes each folder under the path
-    is an ARC project directory, and search for the thermo
-    library based on /Project directory/output/RMG libraries/thermo/
+    This function search for the thermo library
+    based on /thermo/*.py or /libraries/*.py
     Args:
         path (str): The path to project directories
     Returns:
@@ -34,7 +33,7 @@ def find_thermo_libs(path):
         if not dirs:
             continue
         # Use ARC folder organization to check thermo library
-        chk_path = os.path.join(root_p, 'output', 'RMG libraries', 'thermo')
+        chk_path = os.path.join(root_p, 'thermo')
         if os.path.isdir(chk_path):
             # Find the corresponding thermo lib file
             thermo_lib = glob.glob(os.path.join(chk_path, '*.py'))[0]
@@ -47,7 +46,7 @@ def find_thermo_libs(path):
                     continue
                 else:
                     thermo_lib_list.append(thermo_lib)
-                    logging.info("Find thermo library at {0}".format(thermo_lib)) 
+                    logging.info("Find thermo library at {0}".format(thermo_lib))
     return thermo_lib_list
 
 
@@ -131,7 +130,6 @@ def merge_thermo_lib(base_lib, lib_to_add):
 def draw_free_energies(entry_list, label='', T_min=300, T_max=2000, legends="", size=4):
     """
     Plot the Gibbs free energy of a common species from two different library entries
-    
     """
     # Skip this step if matplotlib is not installed
     try:
