@@ -11,6 +11,88 @@ from rmgpy.species import Species
 from toolbox.base import find_blocks, read_block, read_yaml_file, write_yaml_file
 
 ##################################################################
+
+def get_spc_list_from_labels(label_list, spc_dict):
+    """
+    Convert a list of species labels to a list of species info according to species dictionary
+    Args:
+        label_list (list): a list of species label
+        spc_dict (dict): a dictionary of species
+    Returns:
+        spc_list (list): a list of species info 
+    """
+    spc_list = list()
+    for label in label_list:
+        try:
+            spc = spc_dict[label]
+        except KeyError:
+            logging.error('The label %s is not in the species dictionary' %(label))
+            return
+        else:
+            if label != spc.label:
+                spc.label = label
+            spc_list.append(spc)
+    return spc_list
+
+
+def rmg_chemkin_label(chem_path):
+    """
+    build up two label dictionary rmg_to_chemkin and chemkin_to_rmg from the RMG
+    generated CHEMKIN file 
+    Args:
+        chem_path (str): the path to RMG generated CHEMKIN file
+    Returns:
+        rmg_to_chemkin (dict): a list of species info
+    """
+    rmg_to_chemkin, chemkin_to_rmg = {}, {}
+    def action(line): 
+        chemkin_label, _, rmg_label = line.strip().split()
+        rmg_to_chemkin[rmg_label] = chemkin_label
+        chemkin_to_rmg[chemkin_label] = rmg_label 
+    with open(chem_path, 'r') as f:
+        start, end = find_blocks(f, head_pat=r'SPECIES',
+                                tail_pat=r'END', regex=True)[0]
+        read_block(f, action, start, end)
+    return rmg_to_chemkin, chemkin_to_rmg
+
+
+def combine_spc_list(spc_list1, spc_list2, same_source=True):
+    """
+    combine two species list used in ARC input files
+    Args:
+        spc_list1 (list): One of the list containing species info for ARC input files
+        spc_list2 (list): The other list
+        same_source (bool): If two lists are generated using the 
+                            same set of chemkin file and species dictionary
+    Returns:
+        spc_list (list): A list contains all of the species in spc_list1 and 
+                         spc_list2
+    """
+    # If same source, then just compare the label
+    if same_source:
+        spc_list = spc_list1 + spc_list2
+        spc_list = list(set(spc_list))
+    # If not same source, compare the structure
+    else:
+        spc_list = list()
+        for spc in spc_list1:
+            if 'smiles' in spc.keys():
+                spc_list.append(Species().from_smiles(spc['smiles']))
+            elif 'adjlist' in spc.keys():
+                spc_list.append(Species().from_adjacency_list(spc['adjlist']))
+        for spc in spc_list2:
+            if 'smiles' in spc.keys():
+                species = Species().from_smiles(spc['smiles'])
+            elif 'adjlist' in spc.keys():
+                species = Species().from_adjacency_list(spc['adjlist'])
+            for species1 in spc_list:
+                if species1.is_isomorphic(species):
+                    break
+            else:
+                spc_list.append(spc)
+    return spc_list
+
+
 def read_spc_list_from_yml(yml_file):
     """
     Read the species contained in a yaml file. The function assumes
