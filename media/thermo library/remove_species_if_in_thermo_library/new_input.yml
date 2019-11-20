@@ -1,0 +1,8 @@
+freq: b3lyp/cbsb7
+level_of_theory: cbs-qb3
+project: BA
+scan: b3lyp/cbsb7
+species:
+- label: tBA
+  multiplicity: 1
+  smiles: CC(=O)OC(C)(C)C

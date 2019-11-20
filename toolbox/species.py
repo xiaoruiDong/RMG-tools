@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-The toolbox for species related task
+The toolbox for species related tasks
 """
 
 import logging
@@ -167,7 +167,7 @@ def write_spc_list_to_yml(spc_info, yml_file, mode='backup', info_type='smiles')
                 d['adjlist'] = entry.to_adjacency_list()
             d['multiplicity'] = entry.multiplicity
             spc_list.append(d)
-        logging.info('Writing the species %s in to the yaml file' %
+        logging.info('Writing the species %s into the yaml file' %
                      (d['label']))
     else:
         pass
