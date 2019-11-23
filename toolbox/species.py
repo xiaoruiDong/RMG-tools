@@ -5,19 +5,25 @@ The toolbox for species related tasks
 
 import logging
 import os
+import re
 
+from rmgpy.data.kinetics import KineticsLibrary
+from rmgpy.molecule.molecule import Molecule
 from rmgpy.species import Species
 
 from toolbox.base import find_blocks, read_block, read_yaml_file, write_yaml_file
+from toolbox.molecule import get_molecule_from_identifier
 
 ##################################################################
 
 def get_spc_list_from_labels(label_list, spc_dict):
     """
     Convert a list of species labels to a list of species info according to species dictionary
+    
     Args:
         label_list (list): a list of species label
         spc_dict (dict): a dictionary of species
+    
     Returns:
         spc_list (list): a list of species info 
     """
@@ -37,10 +43,12 @@ def get_spc_list_from_labels(label_list, spc_dict):
 
 def rmg_chemkin_label(chem_path):
     """
-    build up two label dictionary rmg_to_chemkin and chemkin_to_rmg from the RMG
+    Build up two label dictionary rmg_to_chemkin and chemkin_to_rmg from the RMG
     generated CHEMKIN file 
+    
     Args:
         chem_path (str): the path to RMG generated CHEMKIN file
+    
     Returns:
         rmg_to_chemkin (dict): a list of species info
     """
@@ -56,14 +64,17 @@ def rmg_chemkin_label(chem_path):
     return rmg_to_chemkin, chemkin_to_rmg
 
 
-def combine_spc_list(spc_list1, spc_list2, same_source=True):
+def combine_spc_list(spc_list1, spc_list2, same_source=True, resonance=True):
     """
-    combine two species list used in ARC input files
+    Combine two species list used in ARC input files
+    
     Args:
         spc_list1 (list): One of the list containing species info for ARC input files
         spc_list2 (list): The other list
         same_source (bool): If two lists are generated using the 
                             same set of chemkin file and species dictionary
+        resonance (bool): Generate resonance structures when checking isomorphism 
+    
     Returns:
         spc_list (list): A list contains all of the species in spc_list1 and 
                          spc_list2
@@ -85,6 +96,8 @@ def combine_spc_list(spc_list1, spc_list2, same_source=True):
                 species = Species().from_smiles(spc['smiles'])
             elif 'adjlist' in spc.keys():
                 species = Species().from_adjacency_list(spc['adjlist'])
+            if resonance:
+                species.generate_resonance_structures()
             for species1 in spc_list:
                 if species1.is_isomorphic(species):
                     break
@@ -99,8 +112,10 @@ def read_spc_list_from_yml(yml_file):
     that species are listed under the key "species".
     It also assumes the molecule contains at least one kind of geom info.
     Currently only support SMILES and Adjacency list.
+    
     Args:
         yml_file (str): The path to the input yml file
+    
     Return:
         spc_list (list): A list contains all the species in the file
     """
@@ -132,6 +147,7 @@ def write_spc_list_to_yml(spc_info, yml_file, mode='backup', info_type='smiles')
     """
     Write the species to a yaml file format. The function lists
     species under the key "species". 
+    
     Args:
         spc_info (list): A iterable datastructure containing species info
         yml_file (str): The path to a new/existed yml file

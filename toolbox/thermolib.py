@@ -21,8 +21,10 @@ def find_thermo_libs(path):
     """
     This function search for the thermo library
     based on /thermo/*.py or /libraries/*.py
+    
     Args:
         path (str): The path to project directories
+    
     Returns:
         thermo_lib_list (list): Entries of the path to thermo libraries
     """
@@ -53,8 +55,9 @@ def find_thermo_libs(path):
 def read_thermo_lib_by_path(lib_path, thermo_db):
     """
     Read thermo library given its library path
+    
     Args:
-        lib_path (str): path to thermo library file
+        lib_path (str): Path to thermo library file
         thermo_database (ThermoDatabase): RMG thermo database object
     """
     if not os.path.exists(lib_path):
@@ -81,8 +84,10 @@ def read_thermo_lib_by_path(lib_path, thermo_db):
 def merge_thermo_lib(base_lib, lib_to_add):
     """
     Merge one library (lib_to_add) into the base library
-    base_lib (RMG thermo library): The library used as the base
-    lib_to_add (RMG thermo library): The library to be added to the base library
+
+    Args:
+        base_lib (RMG thermo library): The library used as the base
+        lib_to_add (RMG thermo library): The library to be added to the base library
     """
     for spc_label, spc in lib_to_add.entries.items():
         # Check the entry merging info
@@ -91,6 +96,7 @@ def merge_thermo_lib(base_lib, lib_to_add):
             continue
         # Loop through the species in the base library to check duplicates
         for _, base_spc in base_lib.entries.items():
+            spc.item.generate_resonance_structures()
             if spc.item.is_isomorphic(base_spc.item):
                 in_base = True
                 break
@@ -127,9 +133,17 @@ def merge_thermo_lib(base_lib, lib_to_add):
                     base_lib.label)
 
 
-def draw_free_energies(entry_list, label='', T_min=300, T_max=2000, legends="", size=4):
+def draw_free_energies(entry_list, label='', T_min=300, T_max=2000, legends=None, size=4):
     """
     Plot the Gibbs free energy of a common species from two different library entries
+
+    Args:
+        entry_list (list): A list of RMG Thermo Entry or Entry.data
+        label (str): The species label used for the figure title
+        T_min (num): The lower bound of temperature range being plotted
+        T_max (num): The upper bound of temperature range being plotted
+        legends (list): A list of legends used in the graph
+        size (num): The size of the graph being plotted
     """
     # Skip this step if matplotlib is not installed
     try:
@@ -169,6 +183,11 @@ def draw_free_energies(entry_list, label='', T_min=300, T_max=2000, legends="", 
     ax.set_xlim(T_min, T_max)
     ax.set_ylabel('Gibbs free energy (kcal/mol)')
     if legends:
+        for legend in legends:
+            if 'group' in legend:
+                legend = 'Group additivity'
+            if os.path.isfile(legend):
+                legend = os.path.basename(legend)
         plt.legend(legends)
     else:
         plt.legend([str(i) for i in range(len(entry_list))])

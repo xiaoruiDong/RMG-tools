@@ -14,10 +14,12 @@ from rmgpy.data.thermo import ThermoLibrary
 
 ##################################################################
 
+
 def chemkin_to_kinetic_lib(chem_path, dict_path, name, save_path='', use_chemkin_names=True):
     """
-    Convert a CHEMKIN file into a RMG kinetic library given species dictionary 
+    Convert a CHEMKIN file into a RMG kinetic library given species dictionary
     and the library name.
+
     Args:
         chem_path (str): The path to the CHEMKIN file
         dict_path (str): The path to a species dictionary

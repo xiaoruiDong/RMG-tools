@@ -10,13 +10,16 @@ import pydot
 
 ##################################################################
 
+
 def get_spc_label_from_fluxdiagrams(file_list):
     """
     Get the list of species contained in multiple flux diagrams
+
     Args:
-        file_list (str): a list contains the paths of flux diagram dot files    
+        file_list (str): A list contains the paths of flux diagram dot files
+
     Return:
-        spc_list (list): a list of species
+        spc_list (list): A list of species
     """
     # As flux diagrams under the same folder have the same species
     # we only need to read one graph
@@ -36,20 +39,22 @@ def get_spc_label_from_fluxdiagrams(file_list):
 
 def get_spc_label_from_fluxdiagram(file_path):
     """
-    Given the flux diagram in dot file, the species labels 
+    Given the flux diagram in dot file, the species labels
     on the flux diagram will be extracted and output as a list
+
     Args:
-        path (str): the file path to the flux diagram dot file
+        path (str): The file path to the flux diagram dot file
+
     Returns:
-        label_list (list): a list which contains species labels
+        label_list (list): A list which contains species labels
     """
     # Read the .dot file to graph
     graph = pydot.graph_from_dot_file(file_path)
     # Extract the node list
     node_list = graph[0].get_node_list()
     # Read the name of each node which is the species label
-    label_list = [node.get_name()
-                for node in node_list if not node.get_name() in ["node", "graph"]]
+    label_list = [node.get_name() for node in node_list
+                  if not node.get_name() in ["node", "graph"]]
     # Solve inconsistency in quotation marks
     # Cases that somes nodes may have extra quotation marks
     for index, label in enumerate(label_list):

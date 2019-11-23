@@ -14,10 +14,12 @@ import pydot
 def get_spc_label_from_sa(file_list, N=50, ):
     """
     Get the list of species contained in multiple sensitivity analysis
+    
     Args:
         file_list (str): a list contains the paths of sensitivity analysis csv files
         N (int): the upperbound number of species to be extracted in each SA    
-    Return:
+    
+    Returns:
         spc_list (list): a list of species
     """
     spc_list = list()
