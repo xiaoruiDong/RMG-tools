@@ -193,3 +193,102 @@ def write_spc_list_to_yml(spc_info, yml_file, mode='backup', info_type='smiles')
         content = {}
         content['species'] = spc_list
     write_yaml_file(target, content)
+
+
+def read_spc_dict_from_path(dict_path):
+    """
+    Read species dictionary given the dictionary file path
+    
+    Args:
+        dict_path (str): the absolute path to species dictionary
+    
+    Returns:
+        spc_dict (OrderedDict): an ordered dictionary has all species information
+    """
+    lib = KineticsLibrary()
+    spc_dict = lib.get_species(dict_path)
+    return spc_dict
+
+
+def get_spc_from_id(identifier):
+    """
+    Get species according to the string input
+    
+    Args:
+        identifier (str): Identifier used to generate species
+    
+    Returns:
+        (RMG Species): an RMG species object corresponding to the identifier
+    """
+    molecule = get_molecule_from_identifier(identifier)
+    if molecule:
+        return Species().from_adjacency_list(molecule.to_adjacency_list())
+
+
+def add_spc_to_spc_dict(label, identifier, spc_dict, interactive=False):
+    """
+    Add a species to the species dictionary
+    
+    Args:
+        label (str): the species label used in the species dictionary
+        identifier (str): Identifier used to generate species
+        dict_path (str): the path of the species dictionary
+    
+    Returns:
+        label (str): return the label if in interactive mode
+    """
+    # Check the label is legal if not interactive
+    if not re.match(r'^[a-zA-Z][a-zA-Z0-9_\-\#\,]*$', label) and not interactive:
+        logging.error('The species label "%s" is not legal. Addition abort.' %(label))
+        return
+    # Create label and identifier if interactive
+    elif interactive:
+        spc = None
+        label = ''
+        while not label:
+            label = input('Species label:')
+        while not identifier:
+            identifier = input('Structure identifier:')
+            spc = get_spc_from_id(identifier)
+    else:
+        spc = get_spc_from_id(identifier)
+    if spc:
+        spc.label = label
+        if spc_dict:
+            # Check if the label is used
+            for label in spc_dict.keys():
+                if spc.label == label:
+                    logging.warn('The label {0} is used, corresponding to species {1}.'
+                                 ' Addition abort.'.format(label, spc.molecule[0].to_smiles()))
+                    return
+            # Check if the species is contained
+            spc.generate_resonance_structures()
+            for species in spc_dict.values():
+                if spc.is_isomorphic(species):
+                    logging.warn('The species {0} is included, corresponding to label {1}'
+                                 ' Addition abort.'.format(spc.molecule[0].to_smiles(), species.label))
+                    return
+        # Otherwise, it is okay to update the species dictionary
+        spc_dict.update({spc.label: spc})
+        logging.info('The species {0} is added, the smiles structure is {1}'.
+                    format(spc.label, spc.molecule[0].to_smiles()))
+        if interactive:
+            return spc.label
+
+
+def write_spc_dict_to_path(spc_dict, path):
+    """
+    Save species dictionary (spc_dict) to the dictionary path
+    
+    Args:
+        spc_dict (OrderedDict): an ordered dictionary has all species information
+        path (str): the absolute path to save species dictionary
+    """
+    if not os.path.isdir(os.path.dirname(path)):
+        os.mkdir(os.path.dirname(path))
+    with open(path, 'w+') as f:
+        for label in spc_dict.keys():
+            f.write(spc_dict[label].molecule[0].to_adjacency_list(
+                label=label, remove_h=False))
+            f.write('\n')
+    logging.warn('Species dictionary is updated (at %s)' %(path))
