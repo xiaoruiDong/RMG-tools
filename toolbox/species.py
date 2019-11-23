@@ -292,3 +292,24 @@ def write_spc_dict_to_path(spc_dict, path):
                 label=label, remove_h=False))
             f.write('\n')
     logging.warn('Species dictionary is updated (at %s)' %(path))
+
+
+def spc_dict_to_spc_list(spc_dict):
+    """
+    Convert a species dictionary to a species list
+    
+    Args:
+        spc_dict (dict): A dictionary contains species information
+    
+    Returns:
+        spc_list (list): A list contains equivalent species information
+    """
+    spc_list = list()
+    for label, spc in spc_dict.items():
+        d = {}
+        d['label'] = label
+        d['smiles'] = spc.molecule[0].to_smiles()
+        d['adjlist'] = spc.to_adjacency_list()
+        d['multiplicity'] = spc.multiplicity
+        spc_list.append(d)
+    return spc_list
