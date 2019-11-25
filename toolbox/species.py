@@ -183,7 +183,7 @@ def write_spc_list_to_yml(spc_info, yml_file, mode='backup', info_type='smiles')
                 d['adjlist'] = entry.to_adjacency_list()
             d['multiplicity'] = entry.multiplicity
             spc_list.append(d)
-        logging.info('Writing the species %s into the yaml file' %
+            logging.info('Writing the species %s into the yaml file' %
                      (d['label']))
     else:
         pass
@@ -294,6 +294,27 @@ def write_spc_dict_to_path(spc_dict, path):
     logging.warn('Species dictionary is updated (at %s)' %(path))
 
 
+def spc_dict_to_arc_input(spc_dict):
+    """
+    Convert a species dictionary to an ARC input format
+    
+    Args:
+        spc_dict (dict): A dictionary contains species information
+    
+    Returns:
+        spc_list (list): A list contains equivalent species information in ARC format
+    """
+    spc_list = list()
+    for label, spc in spc_dict.items():
+        d = {}
+        d['label'] = label
+        d['smiles'] = spc.molecule[0].to_smiles()
+        d['adjlist'] = spc.molecule[0].to_adjacency_list()
+        d['multiplicity'] = spc.multiplicity
+        spc_list.append(d)
+    return spc_list
+
+
 def spc_dict_to_spc_list(spc_dict):
     """
     Convert a species dictionary to a species list
@@ -305,11 +326,6 @@ def spc_dict_to_spc_list(spc_dict):
         spc_list (list): A list contains equivalent species information
     """
     spc_list = list()
-    for label, spc in spc_dict.items():
-        d = {}
-        d['label'] = label
-        d['smiles'] = spc.molecule[0].to_smiles()
-        d['adjlist'] = spc.to_adjacency_list()
-        d['multiplicity'] = spc.multiplicity
-        spc_list.append(d)
+    for spc in spc_dict.values():
+        spc_list.append(spc)
     return spc_list

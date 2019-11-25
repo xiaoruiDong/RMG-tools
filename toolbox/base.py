@@ -22,9 +22,10 @@ def read_yaml_file(path):
 def write_yaml_file(path, data):
     """A handy function for writing yaml files"""
     content = yaml.dump(data=data)
-    if not os.path.exists(os.path.dirname(path)):
+    dir_path = os.path.dirname(path)
+    if not os.path.exists(dir_path) and dir_path:
         os.makedirs(os.path.dirname(path))
-    with open(path, 'w') as f:
+    with open(path, 'w+') as f:
         f.write(content)
 
 
