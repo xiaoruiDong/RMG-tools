@@ -146,3 +146,25 @@ def read_block(f, start=0, end=0, action=None):
     if lines:
         return lines
 
+
+def get_files_by_suffixes(file_path, suffixes):
+    """
+    Get all the file paths corresponding the suffixes given
+
+    Args:
+        file_path (str): The directory which contains files to be found
+        suffixes (list): A list of file suffixes in str
+
+    Returns:
+        file_list (list): A list of file paths
+    """
+    file_list = list()
+    for root, _, files in os.walk(file_path):
+        for file_name in files:
+            for suffix in suffixes:
+                regex = r'\S*' + suffix + '$'
+                match = re.match(regex, file_name)
+                if match:
+                    file_list.append(os.path.join(root, file_name))
+                    break
+    return file_list
