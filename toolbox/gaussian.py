@@ -276,3 +276,25 @@ def classify_gauss_outputs(gauss_files, only_converged=False):
                                            options['method'][0], scan_info))
     return classified
 
+
+def get_gauss_frequencies(file_path):
+    """
+    Get the frequencies from a gaussian frequency job output
+
+    Args:
+        file_path (str): The file path to a frequency job output
+
+    Returns:
+        frequencies (list): A list of sorted frequencies 
+    """
+    frequencies = []
+    with open(file_path, 'r') as f:
+        line = f.readline()
+        while line != '':
+            # Read vibrational frequencies
+            if 'Frequencies --' in line:
+                frequencies.extend(line.split()[2:])
+            line = f.readline()
+    frequencies = [float(freq) for freq in frequencies]
+    frequencies.sort()
+    return frequencies
