@@ -168,3 +168,36 @@ def parse_gauss_scan_info(file_path, output=True):
                                         for i in range(len(values))])
     return scan_info
 
+
+def get_gauss_job_type(setting_dict):
+    """
+    Check the job type according to the setting_dict
+
+    Args:
+        setting_dict (str): A dict containing setting generated
+                            from parse_gauss_options
+    
+    Returns:
+        (str): A str represents the job type
+    """
+    # Check if composite job currently only contains cbs-qb3
+    for method in setting_dict['method']:
+        if method in ['cbs-qb3', ]:
+            return 'composite'
+    if 'irc' in setting_dict:
+        return 'irc'
+    elif 'opt' in setting_dict and 'freq' in setting_dict:
+        return 'opt+freq'
+    elif 'freq' in setting_dict:
+        return 'freq'
+    elif 'opt' in setting_dict:
+        for option in setting_dict['opt']:
+            if option in ['addred', 'addredundant',
+                          'modred', 'modredundant']:
+                return 'scan'
+        else:
+            return 'opt'
+    else:
+        return 'unknown'
+
+
