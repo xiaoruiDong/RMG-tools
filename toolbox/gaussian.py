@@ -126,3 +126,45 @@ def parse_option_contents(content):
     for item in content.split(','):
         content_list.append(item.strip())
     return content_list
+
+
+def parse_gauss_scan_info(file_path, output=True):
+    """
+    Parse the scan info from the Gaussian output
+
+    Args:
+        file_path (str): The full path of the file
+        output (bool): Whether it is an output file
+    
+    Returns:
+        scan_info (dict): A dict contains the scan atomic indexes,
+                          freeze atomic indexes, step and step size
+    """
+    # Parse the gaussian scan info from an output file
+    if output:
+        with open(file_path, 'r') as f:
+            start, end = find_blocks(
+                f, r'The following ModRedundant input section has been read:', r'^\s$')[0]
+            scan_blk = read_block(f, start, end)
+    # Parse from the gaussian input file, to be developed
+    else:
+        logging.error('Currently, only gaussian output parsing is supported.')
+        return
+
+    scan_info = {'scan': None, 'freeze': [], 'step': None, 'step_size': None}
+    scan_pat = r'[BAD]?([\s\d]+){2,4}[\s]+S[\s\d]+[\s\d.]+'
+    frz_pat = r'[DBA]?([\s\d]+){3}[\s]+F'
+    value_pat = r'[\d.]+'
+    for line in scan_blk:
+        if re.search(scan_pat, line.strip()):
+            values = re.findall(value_pat, line)
+            scan_len = len(values) - 2  # atom indexes + step + stepsize
+            scan_info['scan'] = [int(values[i]) for i in range(scan_len)]
+            scan_info['step'] = int(values[-2])
+            scan_info['step_size'] = float(values[-1])
+        if re.search(frz_pat, line.strip()):
+            values = re.findall(value_pat, line)
+            scan_info['freeze'].append([int(values[i])
+                                        for i in range(len(values))])
+    return scan_info
+
