@@ -201,3 +201,42 @@ def get_gauss_job_type(setting_dict):
         return 'unknown'
 
 
+def get_gauss_outputs(path):
+    """
+    Get the gaussian output files in a directory. Ideally, they should
+    be related to the same species or conformer
+
+    Args:
+        path (str): A path to the folder contains related gaussian jobs
+    
+    Returns:
+        gauss_files (list): A list contains all the gaussian output within
+                            the path assigned
+    """
+    file_list = get_files_by_suffixes(path, ['.out', '.log'])
+    gauss_files = []
+    for gauss_file in file_list:
+        with open(gauss_file, 'r') as f:
+            line = f.readline()
+            if 'gaussian' in line.lower():
+                gauss_files.append(gauss_file)
+    return gauss_files
+
+
+def get_gauss_termination_status(file_path):
+    """
+    Get the gaussian terminations status
+
+    Args:
+        file_path (str): A path to the output of a gaussian job
+    
+    Returns:
+        (bool): True for normal termination, False otherwise
+    """
+    with open(file_path, 'r') as f:
+        for line in f: pass
+        if 'normal termination' in line.lower():
+            return True
+        else:
+            return False
+
