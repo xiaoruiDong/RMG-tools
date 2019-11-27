@@ -240,3 +240,39 @@ def get_gauss_termination_status(file_path):
         else:
             return False
 
+
+def classify_gauss_outputs(gauss_files, only_converged=False):
+    """
+    Classify the gaussian output files into single point ('sp'), frequency 
+    ('freq') and scan ('scan')
+
+    Args:
+        gauss_files (list): A list of paths to gaussian output file
+
+    Returns:
+        classified (dict): A dict indicates the files and some properties
+    """
+    classified = {'sp': [], 'freq': [], 'scan': []}
+    for gauss_file in gauss_files:
+        options = parse_gauss_options(gauss_file)
+        job_type = get_gauss_job_type(options)
+        converged = get_gauss_termination_status(gauss_file)
+        if job_type in ['opt', 'opt+freq', 'composite']:
+            if not only_converged or converged:
+                log = GaussianLog(gauss_file)
+                energy = log.load_energy() / Na / E_h
+                ts = 'TS' if 'opt' in options.keys() and 'ts' in options['opt'] else 'nonTS'
+                classified['sp'].append((gauss_file, converged,
+                                         options['method'][0], energy, ts))
+        if job_type in ['freq', 'opt+freq', 'composite']:
+            if not only_converged or converged:
+                freqs = get_gauss_frequencies(gauss_file)
+                classified['freq'].append((gauss_file, converged, 
+                                           options['method'][0], freqs))
+        if job_type == 'scan':
+            if not only_converged or converged:
+                scan_info = parse_gauss_scan_info(gauss_file)
+                classified['scan'].append((gauss_file, converged, 
+                                           options['method'][0], scan_info))
+    return classified
+
