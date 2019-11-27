@@ -46,16 +46,18 @@ def unicode_representer(dumper, data):
 def find_blocks(f, head_pat, tail_pat, regex=True, tail_count=1, block_count=1):
     """
     Return lists of blocks between two regular expressions.
-    args:
-        f (fileObject): a python fileObject
-        head_pat (str/regex): str pattern or regular expression of the head of the block
-        tail_pat (str/regex): str pattern or regular expresion of the tail of the block
+
+    Args:
+        f (fileObject): A python fileObject
+        head_pat (str/regex): Str pattern or regular expression of the head of the block
+        tail_pat (str/regex): Str pattern or regular expresion of the tail of the block
         regex (bool): Whether to use regex to search
-        tail_count (int): the number of time that the tail repeats
-        block_count (int): the number of the blocks to search
-    return:
-        blk_ps (list): list of paired indices indicating the begining
-                        and the ending of the blocks
+        tail_count (int): The number of time that the tail repeats
+        block_count (int): The number of the blocks to search
+
+    Return:
+        blk_ps (list): List of paired indices indicating the begining
+                       and the ending of the blocks
     """
     blk_ps = []
     # Different search mode
@@ -95,11 +97,13 @@ def find_blocks(f, head_pat, tail_pat, regex=True, tail_count=1, block_count=1):
 def get_files_by_regex(file_path, regex):
     """
     Get all the file paths corresponding the regex given
+
     Args:
-        file_path (str): the directory which contains files to be found
-        regex (regex): the regular expression of the search
+        file_path (str): The directory which contains files to be found
+        regex (regex): The regular expression of the search
+
     Return:
-        flux_diag_list (list): a list of file paths
+        file_list (list): A list of file paths
     """
     file_list = list()
     for root, _, files in os.walk(file_path):
@@ -109,22 +113,36 @@ def get_files_by_regex(file_path, regex):
     return file_list
 
 
-def read_block(f, action, start=0, end=0):
+def read_block(f, start=0, end=0, action=None):
     """
     Read the blocks and conduct assigned action from start to end
-    args:
-        f (fileObject): a python fileObject
-        action (function): a function takes line as input
-        start (int): start postion at the file object
-        end (int): end position at the file object
+
+    Args:
+        f (fileObject): A python fileObject
+        start (int): Start postion at the file object
+        end (int): End position at the file object
+        action (function): A function takes line as input
+
+    Returns:
+        lines (list): Lines between start and end. Only available
+                      when action is not assigned. 
     """
-    # if end not assigned, then change it to the end of the file
+    # If end not assigned, then change it to the end of the file
     if not end:
         f.seek(0, 2)
-        end = f.tell() - 1
-    # from start til end, perform action to each line
+        end = f.tell()
+    # If not action, then just return the corresponding lines
+    lines = []
+    if not action:
+        action = lambda line: lines.append(line)
+
+    # From start til end, perform action to each line
     f.seek(start)
     line = f.readline()
-    while f.tell() < end and line != '':
+    while f.tell() <= end and line != '':
         action(line)
         line = f.readline()
+
+    if lines:
+        return lines
+
